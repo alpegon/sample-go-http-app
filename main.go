@@ -24,14 +24,14 @@ func getIP(r *http.Request) string {
 
 func rootHandler(w http.ResponseWriter, r *http.Request) {
 	time.Sleep(time.Duration(responseTime) * time.Second)
-	fmt.Fprintf(w, "/health\n/ip\n/version")
+	fmt.Fprintf(w, "/demo\n/health\n/ip\n/version")
 	fmt.Printf("%v - /\n", getIP(r))
 }
 
-func versionHandler(w http.ResponseWriter, r *http.Request) {
+func demoHandler(w http.ResponseWriter, r *http.Request) {
 	time.Sleep(time.Duration(responseTime) * time.Second)
 	fmt.Fprintf(w, fmt.Sprintf("<html><body><h1 style=\"color:%v\">%v</h1></body></html>", colour, version))
-	fmt.Printf("%v - /version\n", getIP(r))
+	fmt.Printf("%v - /demo\n", getIP(r))
 }
 
 func healthCheckHandler(w http.ResponseWriter, r *http.Request) {
@@ -50,9 +50,16 @@ func ipHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(resp)
 }
 
+func versionHandler(w http.ResponseWriter, r *http.Request) {
+	time.Sleep(time.Duration(responseTime) * time.Second)
+	fmt.Fprintf(w, fmt.Sprintf("%v", version))
+	fmt.Printf("%v - /version\n", getIP(r))
+}
+
 func handleRequests() {
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/", rootHandler)
+	router.HandleFunc("/demo", demoHandler)
 	router.HandleFunc("/healthz", healthCheckHandler)
 	router.HandleFunc("/ip", ipHandler)
 	router.HandleFunc("/version", versionHandler)
