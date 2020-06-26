@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/gorilla/mux"
 	"log"
 	"net/http"
 	"os"
@@ -19,6 +20,12 @@ func getIP(r *http.Request) string {
 		return forwarded
 	}
 	return r.RemoteAddr
+}
+
+func rootHandler(w http.ResponseWriter, r *http.Request) {
+	time.Sleep(time.Duration(responseTime) * time.Second)
+	fmt.Fprintf(w, "/health\n/ip\n/version")
+	fmt.Printf("%v - /\n", getIP(r))
 }
 
 func versionHandler(w http.ResponseWriter, r *http.Request) {
@@ -44,10 +51,12 @@ func ipHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleRequests() {
-	http.HandleFunc("/version", versionHandler)
-	http.HandleFunc("/healthz", healthCheckHandler)
-	http.HandleFunc("/ip", ipHandler)
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%v", port), nil))
+	router := mux.NewRouter().StrictSlash(true)
+	router.HandleFunc("/", rootHandler)
+	router.HandleFunc("/healthz", healthCheckHandler)
+	router.HandleFunc("/ip", ipHandler)
+	router.HandleFunc("/version", versionHandler)
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%v", port), router))
 }
 
 func getIntEnvVar(envVar string) int {

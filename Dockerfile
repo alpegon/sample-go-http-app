@@ -5,13 +5,15 @@ ENV LOAD_TIME 0
 ENV RESPONSE_TIME 0
 ENV PORT 8081
 ENV VERSION 1.0.0
-RUN mkdir /app
 
+RUN mkdir /app
 ADD *.go /app
 
 WORKDIR /app
 
-RUN go build -o main . && \
+RUN apk add git && \ 
+  go get github.com/gorilla/mux && \
+  go build -o main . && \
   addgroup -S utils && \
   adduser -S -g utils utils
 
