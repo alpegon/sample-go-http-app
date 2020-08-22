@@ -1,3 +1,18 @@
+# Builder
+FROM golang:1.14.4-alpine3.12 as builder
+
+RUN mkdir /app
+COPY *.go /app
+
+WORKDIR /app
+
+RUN apk add git && \ 
+  go get github.com/gorilla/mux && \
+  go build -o sample .
+
+#----------------------------------
+
+# Application
 FROM golang:1.14.4-alpine3.12
 
 ENV COLOUR blue
@@ -7,16 +22,12 @@ ENV PORT 8081
 ENV VERSION 1.0.0
 
 RUN mkdir /app
-ADD *.go /app
 
-WORKDIR /app
+COPY --from=builder /app/sample /app/
 
-RUN apk add git && \ 
-  go get github.com/gorilla/mux && \
-  go build -o main . && \
-  addgroup -S utils && \
+RUN addgroup -S utils && \
   adduser -S -g utils utils
 
 USER utils
 
-CMD ["/app/main"]
+CMD ["/app/sample"]
