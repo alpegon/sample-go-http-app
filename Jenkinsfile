@@ -2,11 +2,11 @@ pipeline {
     agent { label 'kaniko'}
 
     stages {
-        stage('Build without pushing to registry') {
+        stage('Build and push to registry') {
             steps {
                 container('kaniko') {
                     sh '''executor \
-                          --no-push \
+                          --destination=docker.io/serbangilvitu/kaniko-test:$(date -u +%Y-%m-%dT%H%M%S) \
                           --context=git://github.com/serbangilvitu/sample-go-http-app.git#refs/heads/master
                     '''
                 }
